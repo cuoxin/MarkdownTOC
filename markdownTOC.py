@@ -2,20 +2,23 @@
 Author: Adrian_Yan
 Title: md创建目录
 Creat: 2020-7-14
-Version: 1.0
+Version: 1.1
 
 '''
 
 
 import re
 import os
+str_re_flag = "<br id=\".+\">"
+re_ed_flag = re.compile(str_re_flag)
 
 def creatTOC(file_path):
     ## 匹配标题
-    str_re = r"#+ .+"
-    str_re_2 = r"```.*" ## 匹配代码块
-    re_ed = re.compile(str_re)
-    re_ed_2 = re.compile(str_re_2)
+    str_re_title = r"#+ .+"
+    str_re_code = r"```.*" ## 匹配代码块
+    re_ed_title = re.compile(str_re_title)
+    re_ed_code = re.compile(str_re_code)
+
     code_bool = False
 
     TOC = {}
@@ -25,7 +28,7 @@ def creatTOC(file_path):
         lines = f.readlines()
         for i, line in enumerate(lines):
             list_code = None
-            list_code = re_ed_2.findall(line)
+            list_code = re_ed_code.findall(line)
             if list_code:
                 code_bool = not code_bool
 
@@ -35,7 +38,7 @@ def creatTOC(file_path):
                 if line in ["[TOC]\n"]:
                     TOC_line = i
 
-                re_find_ed = re_ed.findall(line)
+                re_find_ed = re_ed_title.findall(line)
                 if re_find_ed:
                     str_title = re_find_ed[0]
                     list_title = str_title.split(" ")
@@ -44,6 +47,7 @@ def creatTOC(file_path):
                     length_first = len(list_title[0])
                     list_title = list_title[1:]
                     title = " ".join(list_title)
+                    title = re.sub(re_ed_flag, "", title)
 
                     TOC[i] = [length_first, title]
     
@@ -67,6 +71,8 @@ def creatTOCStr(TOC):
 
 
 def newTitle(i, title):
+    title = re.sub(re_ed_flag, "", title)
+
     apd = "<br id=\"{}\">".format(i)
 
     title = title[:-1]
